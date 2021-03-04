@@ -1,23 +1,18 @@
 from django.db import models
+from mptt.models import MPTTModel, TreeForeignKey
 
-class Category(models.Model):
+class Category(MPTTModel):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
-    parent = models.ForeignKey(self='Category',on_delete=models.CASCADE, blank=True, null=True, related_name='children')
+    parent = TreeForeignKey("self",on_delete=models.CASCADE, blank=True, null=True, related_name='children')
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
 
-class ProductCategory(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
 
 class ProductAttribute(models.Model):
-    product_category = models.ForeignKey(ProductCategory, on_delete=models.RESTRICT)
+    product_category = models.ForeignKey(Category, on_delete=models.RESTRICT)
     name =models.CharField(max_length=100)
 
     def __str__(self):
@@ -25,7 +20,6 @@ class ProductAttribute(models.Model):
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.RESTRICT)
-    product_category = models.ForeignKey(ProductCategory, on_delete=models.RESTRICT)
     name = models.CharField(max_length=255)
     description = models.TextField()
     slug = models.SlugField(max_length=255)
@@ -48,5 +42,3 @@ class ProductAttributeValue(models.Model):
 
     def __str__(self):
         return self.value
-
-
